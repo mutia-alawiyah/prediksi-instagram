@@ -8,14 +8,15 @@ import streamlit as st
 # Konfigurasi Tema Visualisasi
 sns.set_theme(style='whitegrid')
 
-# Load model, kolom, dan dataset asli
+# Load model, kolom, dan dataset asli untuk referensi diagram
 model = joblib.load('model_xgboost.pkl')
 model_columns = joblib.load('model_columns.pkl')
 
 
+# Load data asli untuk analisis/diagram pendukung
 @st.cache_data
 def load_original_data():
-  df = pd.read_excel('data_sosmed.xlsx', sheet_name='Sheet1')
+  df = pd.read_excel('coba.xlsx', sheet_name='Sheet2')
   df['Tanggal'] = pd.to_datetime(df['Tanggal'])
   df['Hari_dalam_Minggu'] = df['Tanggal'].dt.day_name()
   day_mapping = {
@@ -62,8 +63,9 @@ df_data = load_original_data()
 
 st.title('📊 Prediksi Performa & Analisis Extended Engagement')
 st.markdown(
-    'Aplikasi ini memprediksi performa konten berdasarkan **Total Extended'
-    ' Engagement** yang selaras dengan tren grafik di bawah.'
+    'Aplikasi ini memprediksi apakah konten Anda berpotensi menjadi **High'
+    ' Performer** serta menampilkan diagram tren berdasarkan **Total Extended'
+    ' Engagement** (Like + Comment + Share + Save + Visits + Taps).'
 )
 
 st.divider()
@@ -77,15 +79,13 @@ with col1:
       'Hari Publish', ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
   )
   jenis_pilih = st.selectbox(
-      'Jenis Konten', ['feed', 'reels']
+      'Jenis Konten', ['reels', 'carousel', 'single image', 'unknown']
   )
 with col2:
   tema_pilih = st.selectbox(
-      'Tema Konten', ['entertainment', 'informasi', 'pov', 'edukasi']
+      'Tema Konten', ['entertainment', 'informasi', 'pov', 'edukasi', 'unknown']
   )
-  kolaborasi_pilih = st.number_input(
-      'Jumlah Kolaborasi', min_value=0, max_value=10, value=0, step=1
-  )
+  kolaborasi_pilih = st.number_input('Jumlah Kolaborasi', min_value=0, value=0)
 
 # --- BAGIAN 2: TOMBOL PREDIKSI, PENJELASAN, & DIAGRAM ---
 if st.button('🚀 Prediksi & Analisis Sekarang', type='primary', use_container_width=True):
@@ -121,18 +121,20 @@ if st.button('🚀 Prediksi & Analisis Sekarang', type='primary', use_container_
     )
 
   st.markdown(
-      f'**💡 Analisis Keselarasan:** Anda memilih konten **{jenis_pilih.upper()}**'
-      f' pada hari **{hari_pilih}**. Model AI membaca pola dari total interaksi'
-      f' absolut yang konsisten dengan tren grafik rata-rata di bawah.'
+      f'**💡 Analisis Kombinasi:** Anda memilih konten **{jenis_pilih.upper()}**'
+      f' bertema **{tema_pilih.upper()}** yang dipublish pada hari'
+      f' **{hari_pilih}** dengan **{kolaborasi_pilih} kolaborator**. Model'
+      f' menilai potensi kesuksesan kombinasi ini berdasarkan rekam jejak'
+      f' interaksi absolut.'
   )
 
-  # --- BAGIAN 3: DIAGRAM VISUALISASI YANG SELARAS ---
+  # --- BAGIAN 3: DIAGRAM VISUALISASI BERDASARKAN EXTENDED ENGAGEMENT ---
   st.divider()
   st.subheader('📈 Diagram Rata-rata Total Extended Engagement')
 
   fig, axes = plt.subplots(2, 2, figsize=(12, 10))
 
-  # 1. Grafik Hari Publish
+  # 1. Grafik Berdasarkan Hari Publish
   day_order = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
   hari_agg = (
       df_data.groupby('Hari_Publish')['Total_Engagement_Extended']
@@ -153,7 +155,7 @@ if st.button('🚀 Prediksi & Analisis Sekarang', type='primary', use_container_
   axes[0, 0].set_ylabel('Rata-rata Total Interaksi')
   axes[0, 0].tick_params(axis='x', rotation=30)
 
-  # 2. Grafik Jenis Konten
+  # 2. Grafik Berdasarkan Jenis Konten
   jenis_agg = df_data.groupby('Jenis Konten')['Total_Engagement_Extended'].mean()
   sns.barplot(
       x=jenis_agg.index, y=jenis_agg.values, ax=axes[0, 1], palette='Purples_d'
@@ -163,7 +165,7 @@ if st.button('🚀 Prediksi & Analisis Sekarang', type='primary', use_container_
   )
   axes[0, 1].set_ylabel('Rata-rata Total Interaksi')
 
-  # 3. Grafik Tema Konten
+  # 3. Grafik Berdasarkan Tema Konten
   tema_agg = df_data.groupby('tema konten')['Total_Engagement_Extended'].mean()
   sns.barplot(
       x=tema_agg.index, y=tema_agg.values, ax=axes[1, 0], palette='Greens_d'
@@ -174,7 +176,7 @@ if st.button('🚀 Prediksi & Analisis Sekarang', type='primary', use_container_
   axes[1, 0].set_ylabel('Rata-rata Total Interaksi')
   axes[1, 0].tick_params(axis='x', rotation=25)
 
-  # 4. Grafik Jumlah Kolaborasi
+  # 4. Grafik Berdasarkan Jumlah Kolaborasi
   kolab_agg = df_data.groupby('kolaborasi')['Total_Engagement_Extended'].mean()
   sns.barplot(
       x=kolab_agg.index, y=kolab_agg.values, ax=axes[1, 1], palette='Oranges_d'
