@@ -15,7 +15,7 @@ model_columns = joblib.load('model_columns.pkl')
 # Load data asli untuk analisis/diagram pendukung
 @st.cache_data
 def load_original_data():
-  df = pd.read_excel('coba.xlsx', sheet_name='Sheet2')
+  df = pd.read_excel('data_sosmed.xlsx', sheet_name='Sheet1')
   df['Tanggal'] = pd.to_datetime(df['Tanggal'])
   df['Hari_dalam_Minggu'] = df['Tanggal'].dt.day_name()
   day_mapping = {
