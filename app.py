@@ -1,12 +1,7 @@
 import joblib
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import streamlit as st
-
-# Konfigurasi Tema Grafik
-sns.set_theme(style='whitegrid')
 
 # Load model dan kolom yang sudah disimpan dari Colab
 model = joblib.load('model_xgboost.pkl')
@@ -20,10 +15,9 @@ st.markdown(
 
 st.divider()
 
-# --- BAGIAN 1: FORM INPUT & PREDIKSI ---
+# --- BAGIAN 1: FORM INPUT ---
 st.subheader('📝 Masukkan Parameter Konten')
 
-# Form Input (Tanpa Bulan)
 hari_pilih = st.selectbox(
     'Hari Publish', ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
 )
@@ -35,6 +29,7 @@ tema_pilih = st.selectbox(
 )
 kolaborasi_pilih = st.number_input('Jumlah Kolaborasi', min_value=0, value=0)
 
+# --- BAGIAN 2: TOMBOL PREDIKSI & PENJELASAN DINAMIS ---
 if st.button('🚀 Prediksi Sekarang', type='primary', use_container_width=True):
   # Siapkan dataframe input
   input_data = pd.DataFrame(
@@ -46,70 +41,37 @@ if st.button('🚀 Prediksi Sekarang', type='primary', use_container_width=True)
       }
   )
 
-  # One-hot encoding dan sesuaikan dengan kolom saat training di Colab
+  # One-hot encoding dan sesuaikan dengan kolom saat training
   input_encoded = pd.get_dummies(input_data)
   input_encoded = input_encoded.reindex(columns=model_columns, fill_value=0)
 
-  # Prediksi
+  # Proses Prediksi
   prediksi = model.predict(input_encoded)[0]
   probabilitas = model.predict_proba(input_encoded)[0]
 
   st.markdown('---')
-  st.subheader('🎯 Hasil Prediksi')
+  st.subheader('🎯 Hasil Analisis & Prediksi')
 
+  # Menampilkan Kotak Hasil Status
   if prediksi == 1:
     st.success(
-        f'🌟 **High Performer!**\n\nKonten dengan kombinasi ini diprediksi'
-        f' memiliki *Extended Engagement Rate* di atas rata-rata. Tingkat'
-        f' keyakinan model: **{probabilitas[1]*100:.2f}%**'
+        f'🌟 **Prediksi: HIGH PERFORMER!**\n\n'
+        f'Tingkat keyakinan model: **{probabilitas[1]*100:.2f}%**'
     )
   else:
     st.warning(
-        f'⚠️ **Standar**\n\nKonten dengan kombinasi ini diprediksi memiliki'
-        f' performa standar. Tingkat keyakinan model:'
-        f' **{probabilitas[0]*100:.2f}%**'
+        f'⚠️ **Prediksi: Standar / Performa Biasa**\n\n'
+        f'Tingkat keyakinan model: **{probabilitas[0]*100:.2f}%**'
     )
 
-# --- BAGIAN 2: DIAGRAM & PENJELASAN DI BAWAH ---
-st.divider()
-st.subheader('📈 Analisis & Tingkat Kepentingan Fitur (Feature Importance)')
-st.markdown(
-    'Diagram di bawah menunjukkan seberapa besar pengaruh masing-masing'
-    ' variabel terhadap keputusan model dalam menentukan performa konten.'
-)
-
-# Mengambil nilai feature importance dari model XGBoost
-if hasattr(model, 'feature_importances_'):
-  importances = pd.Series(model.feature_importances_, index=model_columns).sort_values(
-      ascending=True
-  )
-
-  # Membuat Plot dengan Matplotlib & Seaborn
-  fig, ax = plt.subplots(figsize=(8, max(4, len(model_columns) * 0.4)))
-  importances.plot(kind='barh', color='darkorange', ax=ax)
-  ax.set_title(
-      'Bobot Pengaruh Fitur terhadap Performa Konten',
-      fontsize=12,
-      fontweight='bold',
-  )
-  ax.set_xlabel('Nilai Kepentingan (Importance Score)')
-  ax.set_ylabel('Atribut Fitur')
-  plt.tight_layout()
-
-  # Menampilkan grafik ke Streamlit
-  st.pyplot(fig)
-
-  # Penjelasan Analitis Otomatis
-  st.markdown('### 💡 Penjelasan & Wawasan (*Insights*):')
+  # Menampilkan Penjelasan Rinci di Bawahnya saat Tombol Ditekan
+  st.markdown('### 💡 Penjelasan Mengapa Hasil Ini Diprediksi:')
   st.markdown(
-      '- **Faktor Dominan:** Fitur yang memiliki batang paling panjang pada'
-      ' diagram di atas adalah variabel yang paling diandalkan oleh model'
-      ' untuk menilai apakah sebuah konten sukses atau tidak.\n- **Strategi'
-      ' Konten:** Anda dapat memprioritaskan jenis konten, tema, atau hari'
-      ' publish yang memiliki bobot pengaruh tertinggi berdasarkan pola data'
-      ' historis Anda sebelumnya.\n- **Kolaborasi & Waktu:** Jumlah'
-      ' kolaborator dan pemilihan hari turut memberikan kontribusi spesifik'
-      ' dalam mendongkrak interaksi audiens.'
+      f'- **Kombinasi Input Anda:** Anda memilih untuk mempublish konten'
+      f' bertipe **{jenis_pilih.upper()}** dengan tema **{tema_pilih.upper()}**'
+      f' pada hari **{hari_pilih}** dengan jumlah kolaborator sebanyak'
+      f' **{kolaborasi_pilih} orang**.\n- **Logika Model:** Berdasarkan'
+      f' pembelajaran pola historis dari data Anda, model mencocokkan'
+      f' karakteristik kombinasi tersebut terhadap rasio *Extended Engagement'
+      f' Rate* masa lalu.\n- **Kesimpulan:** {"Kombinasi ini memiliki daya tarik dan pola interaksi yang kuat berdasarkan rekam jejak data sebelumnya, sehingga dinilai berpotensi menghasilkan *engagement* di atas rata-rata." if prediksi == 1 else "Kombinasi ini memiliki karakteristik yang mirip dengan konten-konten masa lalu yang perolehan interaksinya cenderung moderat atau di bawah nilai median."}'
   )
-else:
-  st.info('Model yang digunakan tidak mendukung fitur *Feature Importance*.')
