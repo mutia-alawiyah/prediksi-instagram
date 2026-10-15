@@ -81,11 +81,11 @@ with col1:
       'Hari Publish', ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
   )
   jenis_pilih = st.selectbox(
-      'Jenis Konten', ['reels', 'carousel', 'single image', 'unknown']
+      'Jenis Konten', ['reels', 'feed']
   )
 with col2:
   tema_pilih = st.selectbox(
-      'Tema Konten', ['entertainment', 'informasi', 'pov', 'edukasi', 'unknown']
+      'Tema Konten', ['entertainment', 'informasi', 'pov', 'edukasi']
   )
   kolaborasi_pilih = st.number_input('Jumlah Kolaborasi', min_value=0, value=0)
 
