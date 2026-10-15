@@ -22,12 +22,12 @@ hari_pilih = st.selectbox(
     'Hari Publish', ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
 )
 jenis_pilih = st.selectbox(
-    'Jenis Konten', ['reels', 'carousel', 'single image', 'unknown']
+    'Jenis Konten', ['reels', 'feed']
 )
 tema_pilih = st.selectbox(
-    'Tema Konten', ['entertainment', 'informasi', 'pov', 'edukasi', 'unknown']
+    'Tema Konten', ['entertainment', 'informasi', 'pov', 'edukasi']
 )
-kolaborasi_pilih = st.number_input('Jumlah Kolaborasi', min_value=0, value=0)
+kolaborasi_pilih = st.number_input('Jumlah Kolaborasi', min_value=0, max_value = 10, value=0)
 
 # --- BAGIAN 2: TOMBOL PREDIKSI & PENJELASAN DINAMIS ---
 if st.button('🚀 Prediksi Sekarang', type='primary', use_container_width=True):
