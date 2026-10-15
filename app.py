@@ -9,27 +9,25 @@ model_columns = joblib.load('model_columns.pkl')
 
 st.title('📊 Prediksi Performa Konten Instagram')
 
-# Form Input
+# Form Input (Tanpa Bulan)
 hari_pilih = st.selectbox(
     'Hari Publish', ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
 )
 jenis_pilih = st.selectbox(
-    'Jenis Konten', ['reels', 'feed']
+    'Jenis Konten', ['reels', 'carousel', 'single image', 'unknown']
 )
 tema_pilih = st.selectbox(
-    'Tema Konten', ['entertainment', 'informasi', 'pov', 'edukasi']
+    'Tema Konten', ['entertainment', 'informasi', 'pov', 'edukasi', 'unknown']
 )
 kolaborasi_pilih = st.number_input('Jumlah Kolaborasi', min_value=0, value=0)
-bulan_pilih = st.slider('Bulan', 1, 12, 10)
 
 if st.button('🚀 Prediksi Sekarang', type='primary'):
-  # Siapkan dataframe input
+  # Siapkan dataframe input (Bulan dihapus)
   input_data = pd.DataFrame(
       {
           'Jenis Konten': [jenis_pilih],
           'tema konten': [tema_pilih],
           'kolaborasi': [kolaborasi_pilih],
-          'Bulan': [bulan_pilih],
           'Hari_Publish': [hari_pilih],
       }
   )
